@@ -25,7 +25,10 @@
                                 <label for="pos" class="col-form-label">Position</label>
                                 <select class="form-control col-md-8" id="dropDown" th:field="*{pos}">
                                     <option value="0">Select Position</option>
-                                    <option th:each="position : ${T(com.lab1.crud.entities.Positions).values()}" th:value="${position}" th:text="${position}" th:selected="${position} == ${player.pos}" id="pos"></option>
+                                    <option th:each="pos : ${T(com.nba.statistics.entities.Positions).values()}"
+                                            th:value="${pos}"
+                                            th:text="${pos}">
+                                    </option>
                                 </select>
                             </div>
                             <div class="form-group col-md-6">

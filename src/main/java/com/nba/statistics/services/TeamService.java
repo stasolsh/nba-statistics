@@ -28,7 +28,7 @@ public class TeamService {
     }
 
     public Team findById(int id) {
-        return teamRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid player Id:" + id));
+        return teamRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid team Id:" + id));
     }
 
     public void delete(Team team) {
