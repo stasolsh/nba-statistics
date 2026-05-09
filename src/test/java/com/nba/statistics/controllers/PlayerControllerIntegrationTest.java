@@ -1,5 +1,6 @@
 package com.nba.statistics.controllers;
 
+import com.nba.statistics.entities.Player;
 import com.nba.statistics.entities.Positions;
 import com.nba.statistics.repositories.PlayerRepository;
 import com.nba.statistics.repositories.TeamRepository;
@@ -91,5 +92,63 @@ class PlayerControllerIntegrationTest {
                 .andExpect(redirectedUrl("/index-player"));
 
         assertThat(playerRepository.findById(1)).isNotPresent();
+    }
+    @Test
+    void shouldUpdatePlayer() throws Exception {
+        mockMvc.perform(post("/update/player/1")
+                        .param("name", "Updated Player")
+                        .param("age", "30")
+                        .param("pos", Positions.SG.name())
+                        .param("team.id", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/index-player"));
+
+        Player updatedPlayer = playerRepository.findById(1).orElseThrow();
+
+        assertThat(updatedPlayer.getName()).isEqualTo("Updated Player");
+        assertThat(updatedPlayer.getAge()).isEqualTo(30);
+        assertThat(updatedPlayer.getPos()).isEqualTo(Positions.SG);
+        assertThat(updatedPlayer.getTeam().getId()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldReturnUpdatePlayerFormWhenValidationFails() throws Exception {
+        mockMvc.perform(post("/update/player/1")
+                        .param("name", "")
+                        .param("age", "0")
+                        .param("pos", Positions.PG.name())
+                        .param("team.id", "1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("update-player"))
+                .andExpect(model().attributeHasFieldErrors("player", "name", "age"))
+                .andExpect(model().attributeExists("teams"));
+    }
+
+    @Test
+    void shouldShowUpdatePlayerForm() throws Exception {
+        mockMvc.perform(get("/edit/player/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("update-player"))
+                .andExpect(model().attributeExists("player"))
+                .andExpect(model().attributeExists("teams"));
+    }
+
+    @Test
+    void shouldShowPlayerStatisticsPage() throws Exception {
+        mockMvc.perform(get("/index-player-statistics"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index-player-statistics"))
+                .andExpect(model().attributeExists("searchInfo"));
+    }
+
+    @Test
+    void shouldShowPlayerStatistics() throws Exception {
+        mockMvc.perform(get("/player-statistics")
+                        .param("team.id", "1")
+                        .param("min", "20")
+                        .param("max", "40"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index-player"))
+                .andExpect(model().attributeExists("players"));
     }
 }

@@ -62,4 +62,43 @@ class CoachControllerIntegrationTest {
                 .andExpect(view().name("add-coach"))
                 .andExpect(model().attributeHasFieldErrors("coach", "name", "age"));
     }
+
+    @Test
+    void shouldUpdateForm() throws Exception {
+        mockMvc.perform(get("/edit/coach/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("update-coach"))
+                .andExpect(model().attributeExists("coach"))
+                .andExpect(model().attributeExists("teams"));
+    }
+
+    @Test
+    void shouldUpdateCoach() throws Exception {
+        mockMvc.perform(post("/update/coach/1")
+                        .param("name", "Update Coach")
+                        .param("age", "48")
+                .param("team.id", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/index-coach"));
+    }
+
+    @Test
+    void shouldReturnUpdateFormWhenCoachValidationFails() throws Exception {
+        mockMvc.perform(post("/update/coach/1")
+                        .param("name", "")
+                        .param("age", "0")
+                        .param("team.id", "1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("update-coach"))
+                .andExpect(model().attributeHasFieldErrors("coach", "name", "age"))
+                .andExpect(model().attributeExists("teams"));
+    }
+
+    @Test
+    void shouldDeleteCoach() throws Exception {
+        assertThat(coachRepository.findById(1)).isPresent();
+        mockMvc.perform(get("/delete/coach/1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/index-coach"));
+    }
 }

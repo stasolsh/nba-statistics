@@ -1,5 +1,6 @@
 package com.nba.statistics.controllers;
 
+import com.nba.statistics.entities.Team;
 import com.nba.statistics.repositories.TeamRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,4 +65,40 @@ class TeamControllerIntegrationTest {
                 .andExpect(view().name("add-team"))
                 .andExpect(model().attributeHasFieldErrors("team", "name", "team_abbr", "location"));
     }
+
+    @Test
+    void shouldShowUpdateTeamForm() throws Exception {
+        mockMvc.perform(get("/edit/team/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("update-team"))
+                .andExpect(model().attributeExists("team"));
+    }
+
+    @Test
+    void shouldUpdateTeam() throws Exception {
+        mockMvc.perform(post("/update/team/1")
+                        .param("name", "Updated Team")
+                        .param("team_abbr", "UPD")
+                        .param("location", "Updated/Location"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/index-team"));
+
+        Team updatedTeam = teamRepository.findById(1).orElseThrow();
+
+        assertThat(updatedTeam.getName()).isEqualTo("Updated Team");
+        assertThat(updatedTeam.getTeam_abbr()).isEqualTo("UPD");
+        assertThat(updatedTeam.getLocation()).isEqualTo("Updated/Location");
+    }
+
+    @Test
+    void shouldReturnUpdateTeamFormWhenValidationFails() throws Exception {
+        mockMvc.perform(post("/update/team/1")
+                        .param("name", "")
+                        .param("team_abbr", "VERY_LONG_ABBR")
+                        .param("location", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("update-team"))
+                .andExpect(model().attributeHasFieldErrors("team", "name", "team_abbr", "location"));
+    }
+
 }
