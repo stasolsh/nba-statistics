@@ -1,4 +1,4 @@
-FROM openjdk:21
+FROM eclipse-temurin:21
 
 ENV JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9890"
 
